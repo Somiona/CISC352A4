@@ -57,10 +57,11 @@ class PerceptronModel(object):
             mistake_check = False
             for x,y in dataset.iterate_once(batch):
                 predictor = self.get_prediction(x)
-                direction = nn.as_scalar(y)
-                if predictor != direction:
+                multiplier = nn.as_scalar(y)
+                if predictor != multiplier:
                     mistake_check = True
-                    self.w.update(x, direction)
+                    self.w.update(multiplier, x) 
+               
         
         
 
