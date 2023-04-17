@@ -174,6 +174,8 @@ class DigitClassificationModel(object):
         # number of maximum epochs
         self.patience = 30
         self.n_batch = 20
+        # This flag enables tqdm progress bar and epoch accuracy printer
+        self.somiona_test = True
 
         # for gradient descent
         self.lr = -0.005
@@ -253,6 +255,7 @@ class DigitClassificationModel(object):
         # To make it work properly, I use nn.Constant class with some hacks
         # targeting nn.py.
         # By default, this is not enabled. But on my computer, this works better.
+        # It use 5 epochs to reach 97% accuracy, while the default GD use 12 epochs
         if self.use_momentum:
             print("Notice: Using Momentum Gradient Descent")
 
@@ -293,9 +296,12 @@ class DigitClassificationModel(object):
             self.b4.update(self.lr, b4_gr)
 
         def run_epoch(run_update):
-            # from tqdm import tqdm
-            # for x, y in tqdm(dataset.iterate_once(self.n_batch), total=60000/self.n_batch):
-            for x, y in dataset.iterate_once(self.n_batch):
+            if self.somiona_test:
+                from tqdm import tqdm
+                data = tqdm(dataset.iterate_once(self.n_batch), total=60000/self.n_batch)
+            else:
+                data = dataset.iterate_once(self.n_batch)
+            for x, y in data:
                 loss = self.get_loss(x, y)
 
                 # Calculating gradients for each parameters
@@ -311,12 +317,15 @@ class DigitClassificationModel(object):
 
         update_func = MGD_update if self.use_momentum else GD_update
         # Run until validation accuracy is greater than 97.6%
-        # epoch = 1
-        # while (validation := dataset.get_validation_accuracy()) < 0.976 and epoch <= self.patience:
-        #     run_epoch(update_func)
-        #     print("Epoch: %d, Validation Accuracy: %f" % (epoch, validation))
-        #     epoch += 1
-
-        while dataset.get_validation_accuracy() < 0.976 and self.patience > 0:
-            run_epoch(update_func)
-            self.patience -= 1
+        if self.somiona_test:
+            epoch = 1
+            # this line requires python 3.9+
+            while ((validation := dataset.get_validation_accuracy()) < 0.976 and
+                   epoch <= self.patience):
+                run_epoch(update_func)
+                print("Epoch: %d, Validation Accuracy: %f" % (epoch, validation))
+                epoch += 1
+        else:
+            while dataset.get_validation_accuracy() < 0.976 and self.patience > 0:
+                run_epoch(update_func)
+                self.patience -= 1
