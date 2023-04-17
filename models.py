@@ -175,7 +175,7 @@ class DigitClassificationModel(object):
         self.patience = 30
         self.n_batch = 20
         # This flag enables tqdm progress bar and epoch accuracy printer
-        self.somiona_test = True
+        self.somiona_test = False
 
         # for gradient descent
         self.lr = -0.005
