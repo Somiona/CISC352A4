@@ -74,6 +74,17 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.hidden_size = 300
+        self.learn_rate = -0.001
+        self.threshold = 0.02
+        #the batch size is one because any number is divisible by one.
+        self.batch = 1
+
+        self.W1 = nn.Parameter(1, self.hidden_size)
+        self.W2 = nn.Parameter(self.hidden_size, 1)
+
+        self.b1 = nn.Parameter(1, self.hidden_size)
+        self.b2 = nn.Parameter(1, 1)
 
     def run(self, x):
         """
@@ -85,6 +96,13 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        #The equation used for this block is f(x) = relu(x * W1 + b1) * W2 + b2
+        pre_relu = nn.AddBias(nn.Linear(x, self.W1), self.b1)
+        relu = nn.ReLU(pre_relu)
+
+        ans = nn.AddBias(nn.Linear(relu, self.W2), self.b2)
+
+        return ans
 
     def get_loss(self, x, y):
         """
@@ -97,12 +115,39 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        #calculate the approximate y value
+        approx_y = self.run(x)
+        #calculate the loss
+        ans = nn.SquareLoss(approx_y, y)
+
+        return ans
 
     def train_model(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        trained = False
+        #initially the data is not well trained.
+        #the dataset will be trained until the loss of each data is lesser than 0.02
+        while trained == False:
+            trained = True
+
+            for x, y in dataset.iterate_once(self.batch):
+                loss = self.get_loss(x, y)
+
+                if nn.as_scalar(loss) > self.threshold:
+                    trained = False
+                    #this is for getting gradients for each values
+                    W1_gr, W2_gr, b1_gr, b2_gr = nn.gradients([self.W1, self.W2, self.b1, self.b2], loss)
+
+                    #updating each values
+                    self.W1.update(self.learn_rate, W1_gr)
+                    self.W2.update(self.learn_rate, W2_gr)
+
+                    self.b1.update(self.learn_rate, b1_gr)
+                    self.b2.update(self.learn_rate, b2_gr)
+
 
 class DigitClassificationModel(object):
     """
