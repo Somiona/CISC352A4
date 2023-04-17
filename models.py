@@ -1,5 +1,6 @@
 import nn
 
+
 class PerceptronModel(object):
     def __init__(self, dim):
         """
@@ -27,9 +28,8 @@ class PerceptronModel(object):
         Returns: a node containing a single number (the score)
         """
         "*** YOUR CODE HERE ***"
-        
-        score = nn.DotProduct(x_point, self.w)
-        return score
+
+        return nn.DotProduct(x_point, self.w)
 
     def get_prediction(self, x_point):
         """
@@ -38,32 +38,30 @@ class PerceptronModel(object):
         Returns: -1 or 1
         """
         "*** YOUR CODE HERE ***"
-        
-         if nn.as_scalar(self.run(x_point))>=0:
+
+        if nn.as_scalar(self.run(x_point)) >= 0:
             return 1
         else:
-            return -1 
+            return -1
 
     def train_model(self, dataset):
         """
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE ***"
-        
+
         batch = 1
         mistake_check = True
-        
-        while mistake_check == True:
+
+        while mistake_check:
             mistake_check = False
-            for x,y in dataset.iterate_once(batch):
+            for x, y in dataset.iterate_once(batch):
                 predictor = self.get_prediction(x)
                 multiplier = nn.as_scalar(y)
                 if predictor != multiplier:
                     mistake_check = True
-                    self.w.update(multiplier, x) 
-               
-        
-        
+                    self.w.update(multiplier, x)
+
 
 class RegressionModel(object):
     """
@@ -71,13 +69,14 @@ class RegressionModel(object):
     numbers to real numbers. The network should be sufficiently large to be able
     to approximate sin(x) on the interval [-2pi, 2pi] to reasonable precision.
     """
+
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
         self.hidden_size = 300
         self.learn_rate = -0.001
         self.threshold = 0.02
-        #the batch size is one because any number is divisible by one.
+        # the batch size is one because any number is divisible by one.
         self.batch = 1
 
         self.W1 = nn.Parameter(1, self.hidden_size)
@@ -96,13 +95,11 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-        #The equation used for this block is f(x) = relu(x * W1 + b1) * W2 + b2
+        # The equation used for this block is f(x) = relu(x * W1 + b1) * W2 + b2
         pre_relu = nn.AddBias(nn.Linear(x, self.W1), self.b1)
         relu = nn.ReLU(pre_relu)
 
-        ans = nn.AddBias(nn.Linear(relu, self.W2), self.b2)
-
-        return ans
+        return nn.AddBias(nn.Linear(relu, self.W2), self.b2)
 
     def get_loss(self, x, y):
         """
@@ -115,12 +112,9 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-        #calculate the approximate y value
+        # calculate the approximate y value
         approx_y = self.run(x)
-        #calculate the loss
-        ans = nn.SquareLoss(approx_y, y)
-
-        return ans
+        return nn.SquareLoss(approx_y, y)
 
     def train_model(self, dataset):
         """
@@ -128,9 +122,9 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
         trained = False
-        #initially the data is not well trained.
-        #the dataset will be trained until the loss of each data is lesser than 0.02
-        while trained == False:
+        # initially the data is not well trained.
+        # the dataset will be trained until the loss of each data is lesser than 0.02
+        while not trained:
             trained = True
 
             for x, y in dataset.iterate_once(self.batch):
@@ -138,10 +132,12 @@ class RegressionModel(object):
 
                 if nn.as_scalar(loss) > self.threshold:
                     trained = False
-                    #this is for getting gradients for each values
-                    W1_gr, W2_gr, b1_gr, b2_gr = nn.gradients([self.W1, self.W2, self.b1, self.b2], loss)
+                    # this is for getting gradients for each values
+                    W1_gr, W2_gr, b1_gr, b2_gr = nn.gradients(
+                        [self.W1, self.W2, self.b1, self.b2], loss
+                    )
 
-                    #updating each values
+                    # updating each values
                     self.W1.update(self.learn_rate, W1_gr)
                     self.W2.update(self.learn_rate, W2_gr)
 
@@ -163,6 +159,7 @@ class DigitClassificationModel(object):
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
     """
+
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
@@ -203,4 +200,3 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-
