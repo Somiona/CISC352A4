@@ -28,7 +28,8 @@ class PerceptronModel(object):
         Returns: a node containing a single number (the score)
         """
         "*** YOUR CODE HERE ***"
-
+        
+        # Calculates and returns the dot product of x_point and the current weights
         return nn.DotProduct(x_point, self.w)
 
     def get_prediction(self, x_point):
@@ -38,7 +39,8 @@ class PerceptronModel(object):
         Returns: -1 or 1
         """
         "*** YOUR CODE HERE ***"
-
+        
+        # Calculates the dot product, and retunrns 1 if positive, -1 if negative
         if nn.as_scalar(self.run(x_point)) >= 0:
             return 1
         else:
@@ -49,16 +51,20 @@ class PerceptronModel(object):
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE ***"
-
+        
+        # Set the batch size to 1, and initialize mistake_check to True
         batch = 1
         mistake_check = True
-
+        
+        # Iterate through the dataset to determine the misclassifications
         while mistake_check:
             mistake_check = False
             for x, y in dataset.iterate_once(batch):
                 predictor = self.get_prediction(x)
+                # multiplier is of type Python scalar
                 multiplier = nn.as_scalar(y)
                 if predictor != multiplier:
+                    # Continue the loop and update the weights on the parameter
                     mistake_check = True
                     self.w.update(multiplier, x)
 
